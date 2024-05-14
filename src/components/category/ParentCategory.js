@@ -91,7 +91,35 @@ const ParentCategory = ({
     //   if (x) return x;
     // }
   };
+  const handleSelect = (key) => {
+    const category = data.find((cat) => cat._id === key);
+    if (!category) return; // Add a check for category existence
 
+    const isSelected = selectedCategory.some((cat) => cat._id === key);
+
+    if (isSelected) {
+      // If the category is already selected, remove it from the selected categories
+      setSelectedCategory((prev) => prev.filter((cat) => cat._id !== key));
+      // Also remove its children if they were selected
+      setSelectedCategory((prev) => prev.filter((cat) => !category.children || !category.children.map(child => child._id).includes(cat._id)));
+    } else {
+      // Add the parent category to the selected categories
+      setSelectedCategory((prev) => [...prev, { _id: category._id, name: showingTranslateValue(category?.parent, lang) }]);
+
+      // Prompt the user to select children categories if available
+      if (category.children && category.children.length > 0) {
+        const shouldSelectChildren = notifySuccess("Do you want to select all children categories?");
+        if (shouldSelectChildren) {
+          // Add children categories to the selected categories
+          const childrenToAdd = category.children.map((child) => ({
+            _id: child,
+            name: showingTranslateValue(child, lang)
+          }));
+          setSelectedCategory((prev) => [...prev, ...childrenToAdd]);
+        }
+      }
+    }
+  };
   // const handleSelect = (key) => {
   //   const obj = data[0];
   //   const result = findObject(obj, key);
@@ -326,26 +354,26 @@ const ParentCategory = ({
   //   }
   // };
 
-  const handleSelect = (key) => {
-    const category = data.find((cat) => cat._id === key);
-    const isSelected = selectedCategory.some((cat) => cat._id === key);
-    if (isSelected) {
-      setSelectedCategory((prev) => prev.filter((cat) => cat._id !== key));
-      setSelectedCategory((prev) => prev.filter((cat) => !category.children || !category.children.map(child => child._id).includes(cat._id)));
-    } else {
-      setSelectedCategory((prev) => [...prev, { _id: category._id, name: showingTranslateValue(category?.parent, lang) }]);
-      if (category.children && category.children.length > 0) {
-        const shouldSelectChildren = notifySuccess("Do you want to select all children categories?");
-        if (shouldSelectChildren) {
-          const childrenToAdd = category.children.map((child) => ({
-            _id: child,
-            name: showingTranslateValue(child, lang)
-          }));
-          setSelectedCategory((prev) => [...prev, ...childrenToAdd]);
-        }
-      }
-    }
-  };
+  // const handleSelect = (key) => {
+  //   const category = data.find((cat) => cat._id === key);
+  //   const isSelected = selectedCategory.some((cat) => cat._id === key);
+  //   if (isSelected) {
+  //     setSelectedCategory((prev) => prev.filter((cat) => cat._id !== key));
+  //     setSelectedCategory((prev) => prev.filter((cat) => !category.children || !category.children.map(child => child._id).includes(cat._id)));
+  //   } else {
+  //     setSelectedCategory((prev) => [...prev, { _id: category._id, name: showingTranslateValue(category?.parent, lang) }]);
+  //     if (category.children && category.children.length > 0) {
+  //       const shouldSelectChildren = notifySuccess("Do you want to select all children categories?");
+  //       if (shouldSelectChildren) {
+  //         const childrenToAdd = category.children.map((child) => ({
+  //           _id: child,
+  //           name: showingTranslateValue(child, lang)
+  //         }));
+  //         setSelectedCategory((prev) => [...prev, ...childrenToAdd]);
+  //       }
+  //     }
+  //   }
+  // };
 
   const handleRemove = (v) => {
     setSelectedCategory(v);

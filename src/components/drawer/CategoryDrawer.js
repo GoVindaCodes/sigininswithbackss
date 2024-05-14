@@ -239,17 +239,19 @@ const CategoryDrawer = ({ id, data, lang }) => {
   // };
 
   const handleSelect = async (key) => {
-    // console.log('key', key, 'id', id);
     console.log('key', key);
     if (key === undefined) return;
+
+    // Fetch category information
+    const categoryInfo = await CategoryServices.getCategoryById(key);
+    const parentCategory = categoryInfo.parent;
+    console.log("hey:", parentCategory)
+
     if (id) {
-      const parentCategoryId = await CategoryServices.getCategoryById(key);
-      if (id === key) {
-        return notifyError("This can't be select as a parent category!");
-      } else if (id === parentCategoryId.parentId) {
-        return notifyError("This can't be select as a parent category!");
+      if (id === key || id === parentCategory) {
+        setSelectCategoryName(parentCategory);
+        return notifyError("This can't be selected as a parent category!");
       } else {
-        if (key === undefined) return;
         setChecked(key);
         const obj = data[0];
         const result = findObject(obj, key);
@@ -258,12 +260,11 @@ const CategoryDrawer = ({ id, data, lang }) => {
         setChildren(showingTranslateValue(result, lang))
       }
     } else {
-      if (key === undefined) return;
       setChecked(key);
       const obj = data[0];
       const result = findObject(obj, key);
       console.log("results:", result)
-      setSelectCategoryName(showingTranslateValue(result, lang));
+      setSelectCategoryName(showingTranslateValue(parentCategory || result, lang));
       setChildren(showingTranslateValue(result, lang))
     }
   };
